@@ -223,6 +223,50 @@ FriendlyTank.prototype.takeDamage = function(dmg) {
   }
 };
 
+// Add simple humanoid mesh creator just above Tower.prototype.createTowerMesh
+function createHumanMesh(color = 0x888888) {
+  const group = new THREE.Group();
+
+  // Legs
+  const legGeo = new THREE.CylinderGeometry(0.15, 0.15, 0.8, 8);
+  const legMat = new THREE.MeshPhongMaterial({ color });
+  const leftLeg = new THREE.Mesh(legGeo, legMat);
+  leftLeg.position.set(-0.2, 0.4, 0);
+  const rightLeg = leftLeg.clone();
+  rightLeg.position.set(0.2, 0.4, 0);
+
+  // Body
+  const body = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.35, 0.35, 1.2, 12),
+    new THREE.MeshPhongMaterial({ color })
+  );
+  body.position.y = 1.2;
+
+  // Arms
+  const armGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.9, 6);
+  const leftArm = new THREE.Mesh(armGeo, legMat);
+  leftArm.rotation.z = Math.PI / 2;
+  leftArm.position.set(-0.55, 1.25, 0);
+  const rightArm = leftArm.clone();
+  rightArm.position.set(0.55, 1.25, 0);
+
+  // Head
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(0.35, 12, 12),
+    new THREE.MeshPhongMaterial({ color })
+  );
+  head.position.y = 2.1;
+
+  group.add(leftLeg);
+  group.add(rightLeg);
+  group.add(body);
+  group.add(leftArm);
+  group.add(rightArm);
+  group.add(head);
+
+  return group;
+}
+
 function Tower(scene, type, pos) {
   this.type = type;
   this.level = 0;
@@ -239,273 +283,28 @@ function Tower(scene, type, pos) {
 }
 
 Tower.prototype.createTowerMesh = function() {
-  let mesh;
-  switch(this.type) {
-    case 'minigun':
-      // Minigun: tall cylinder with barrel
-      const minigunGroup = new THREE.Group();
-      const base = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.8, 0.8, 2, 16),
-        new THREE.MeshPhongMaterial({ color: 0x444444 })
-      );
-      const barrel = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.2, 0.2, 1.5, 8),
-        new THREE.MeshPhongMaterial({ color: 0x222222 })
-      );
-      barrel.position.y = 1.5;
-      barrel.rotation.z = Math.PI / 2;
-      minigunGroup.add(base);
-      minigunGroup.add(barrel);
-      mesh = minigunGroup;
-      break;
-      
-    case 'rpg':
-      // RPG: rocket launcher on tripod
-      const rpgGroup = new THREE.Group();
-      const tripod = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.3, 0.3, 1.5, 8),
-        new THREE.MeshPhongMaterial({ color: 0x666666 })
-      );
-      const launcher = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.4, 0.4, 2, 8),
-        new THREE.MeshPhongMaterial({ color: 0x333333 })
-      );
-      launcher.position.y = 1.5;
-      tripod.position.y = 0.75;
-      rpgGroup.add(tripod);
-      rpgGroup.add(launcher);
-      mesh = rpgGroup;
-      break;
-      
-    case 'sniper':
-      // Sniper: long barrel on base
-      const sniperGroup = new THREE.Group();
-      const sniperBase = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.6, 0.6, 1.5, 16),
-        new THREE.MeshPhongMaterial({ color: 0x555555 })
-      );
-      const sniperBarrel = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.1, 0.1, 2.5, 8),
-        new THREE.MeshPhongMaterial({ color: 0x111111 })
-      );
-      sniperBarrel.position.y = 1.5;
-      sniperGroup.add(sniperBase);
-      sniperGroup.add(sniperBarrel);
-      mesh = sniperGroup;
-      break;
-      
-    case 'flamethrower':
-      // Flamethrower: wide nozzle
-      const flameGroup = new THREE.Group();
-      const flameBase = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.7, 0.7, 1.8, 16),
-        new THREE.MeshPhongMaterial({ color: 0x444444 })
-      );
-      const flameNozzle = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.3, 0.5, 1, 8),
-        new THREE.MeshPhongMaterial({ color: 0x222222 })
-      );
-      flameNozzle.position.y = 1.5;
-      flameGroup.add(flameBase);
-      flameGroup.add(flameNozzle);
-      mesh = flameGroup;
-      break;
-      
-    case 'tesla':
-      // Tesla: coil tower
-      const teslaGroup = new THREE.Group();
-      const teslaBase = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.6, 0.6, 1.5, 16),
-        new THREE.MeshPhongMaterial({ color: 0x444444 })
-      );
-      const teslaCoil = new THREE.Mesh(
-        new THREE.TorusGeometry(0.4, 0.1, 8, 16),
-        new THREE.MeshPhongMaterial({ color: 0x0066ff })
-      );
-      teslaCoil.position.y = 1.5;
-      teslaGroup.add(teslaBase);
-      teslaGroup.add(teslaCoil);
-      mesh = teslaGroup;
-      break;
-      
-    case 'medic':
-      // Medic: cross symbol
-      const medicGroup = new THREE.Group();
-      const medicBase = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.6, 0.6, 1.5, 16),
-        new THREE.MeshPhongMaterial({ color: 0xffffff })
-      );
-      const cross = new THREE.Mesh(
-        new THREE.BoxGeometry(0.8, 0.2, 0.2),
-        new THREE.MeshPhongMaterial({ color: 0xff0000 })
-      );
-      cross.position.y = 1.5;
-      medicGroup.add(medicBase);
-      medicGroup.add(cross);
-      mesh = medicGroup;
-      break;
-      
-    case 'engineer':
-      // Engineer: wrench symbol
-      const engineerGroup = new THREE.Group();
-      const engineerBase = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.6, 0.6, 1.5, 16),
-        new THREE.MeshPhongMaterial({ color: 0x666666 })
-      );
-      const wrench = new THREE.Mesh(
-        new THREE.BoxGeometry(0.6, 0.1, 0.1),
-        new THREE.MeshPhongMaterial({ color: 0x333333 })
-      );
-      wrench.position.y = 1.5;
-      engineerGroup.add(engineerBase);
-      engineerGroup.add(wrench);
-      mesh = engineerGroup;
-      break;
-      
-    case 'laser':
-      // Laser: tall, glowing blue rod
-      const laserGroup = new THREE.Group();
-      const laserBase = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.5, 0.5, 1.2, 12),
-        new THREE.MeshPhongMaterial({ color: 0x222244 })
-      );
-      const laserRod = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.2, 0.2, 2.5, 16),
-        new THREE.MeshPhongMaterial({ color: 0x00ccff, emissive: 0x00ccff, emissiveIntensity: 0.7 })
-      );
-      laserRod.position.y = 1.5;
-      laserGroup.add(laserBase);
-      laserGroup.add(laserRod);
-      mesh = laserGroup;
-      break;
-      
-    case 'poison':
-      // Poison: green barrel with bubbles
-      const poisonGroup = new THREE.Group();
-      const poisonBase = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.6, 0.6, 1.2, 12),
-        new THREE.MeshPhongMaterial({ color: 0x228B22 })
-      );
-      const poisonBubble = new THREE.Mesh(
-        new THREE.SphereGeometry(0.4, 8, 8),
-        new THREE.MeshPhongMaterial({ color: 0x00ff00, emissive: 0x00ff00, emissiveIntensity: 0.5 })
-      );
-      poisonBubble.position.y = 1.2;
-      poisonGroup.add(poisonBase);
-      poisonGroup.add(poisonBubble);
-      mesh = poisonGroup;
-      break;
-      
-    case 'freeze':
-      // Freeze: icy blue crystal
-      const freezeGroup = new THREE.Group();
-      const freezeBase = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.5, 0.5, 1.2, 12),
-        new THREE.MeshPhongMaterial({ color: 0x99ccff })
-      );
-      const freezeCrystal = new THREE.Mesh(
-        new THREE.ConeGeometry(0.5, 1.5, 8),
-        new THREE.MeshPhongMaterial({ color: 0x00ffff, emissive: 0x00ffff, emissiveIntensity: 0.7 })
-      );
-      freezeCrystal.position.y = 1.5;
-      freezeGroup.add(freezeBase);
-      freezeGroup.add(freezeCrystal);
-      mesh = freezeGroup;
-      break;
-      
-    case 'bomb':
-      // Bomb: black sphere with fuse
-      const bombGroup = new THREE.Group();
-      const bombBody = new THREE.Mesh(
-        new THREE.SphereGeometry(0.7, 12, 12),
-        new THREE.MeshPhongMaterial({ color: 0x222222 })
-      );
-      const bombFuse = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.05, 0.05, 0.5, 6),
-        new THREE.MeshPhongMaterial({ color: 0xffd700 })
-      );
-      bombFuse.position.y = 1.1;
-      bombGroup.add(bombBody);
-      bombGroup.add(bombFuse);
-      mesh = bombGroup;
-      break;
-      
-    case 'rocket':
-      // Rocket: red rocket on stand
-      const rocketGroup = new THREE.Group();
-      const rocketStand = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.3, 0.3, 1.2, 8),
-        new THREE.MeshPhongMaterial({ color: 0x444444 })
-      );
-      const rocketBody = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.2, 0.2, 1.5, 8),
-        new THREE.MeshPhongMaterial({ color: 0xff0000 })
-      );
-      rocketBody.position.y = 1.2;
-      rocketGroup.add(rocketStand);
-      rocketGroup.add(rocketBody);
-      mesh = rocketGroup;
-      break;
-      
-    case 'plasma':
-      // Plasma: purple orb with rings
-      const plasmaGroup = new THREE.Group();
-      const plasmaBase = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.5, 0.5, 1.2, 12),
-        new THREE.MeshPhongMaterial({ color: 0x800080 })
-      );
-      const plasmaOrb = new THREE.Mesh(
-        new THREE.SphereGeometry(0.5, 12, 12),
-        new THREE.MeshPhongMaterial({ color: 0xcc00ff, emissive: 0xcc00ff, emissiveIntensity: 0.7 })
-      );
-      plasmaOrb.position.y = 1.2;
-      plasmaGroup.add(plasmaBase);
-      plasmaGroup.add(plasmaOrb);
-      mesh = plasmaGroup;
-      break;
-      
-    case 'wind':
-      // Wind: white spiral
-      const windGroup = new THREE.Group();
-      const windBase = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.5, 0.5, 1.2, 12),
-        new THREE.MeshPhongMaterial({ color: 0xdddddd })
-      );
-      const windSpiral = new THREE.Mesh(
-        new THREE.TorusGeometry(0.7, 0.1, 8, 24),
-        new THREE.MeshPhongMaterial({ color: 0xffffff })
-      );
-      windSpiral.position.y = 1.2;
-      windGroup.add(windBase);
-      windGroup.add(windSpiral);
-      mesh = windGroup;
-      break;
-      
-    case 'gold':
-      // Gold: gold bar on pedestal
-      const goldGroup = new THREE.Group();
-      const goldBase = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.6, 0.6, 1.2, 12),
-        new THREE.MeshPhongMaterial({ color: 0xFFD700 })
-      );
-      const goldBar = new THREE.Mesh(
-        new THREE.BoxGeometry(0.8, 0.3, 0.4),
-        new THREE.MeshPhongMaterial({ color: 0xFFD700, emissive: 0xFFD700, emissiveIntensity: 0.5 })
-      );
-      goldBar.position.y = 1.1;
-      goldGroup.add(goldBase);
-      goldGroup.add(goldBar);
-      mesh = goldGroup;
-      break;
-      
-    default:
-      // Default cylinder
-      mesh = new THREE.Mesh(
-        new THREE.CylinderGeometry(1, 1, 2, 16),
-        new THREE.MeshPhongMaterial({ color: this.color })
-      );
-  }
-  return mesh;
+  const colorMap = {
+    minigun: 0x808080,
+    rpg: 0x884444,
+    sniper: 0x444488,
+    flamethrower: 0xcc5500,
+    tesla: 0x0066ff,
+    medic: 0xffffff,
+    engineer: 0x666666,
+    laser: 0x00ccff,
+    poison: 0x228b22,
+    freeze: 0x99ccff,
+    bomb: 0x222222,
+    rocket: 0xff0000,
+    plasma: 0x9932cc,
+    wind: 0xadd8e6,
+    gold: 0xffd700,
+    builder: 0x8b4513,
+    banker: 0x00ff00,
+    demolishinist: 0x888888,
+  };
+  const color = colorMap[this.type] !== undefined ? colorMap[this.type] : 0x888888;
+  return createHumanMesh(color);
 };
 
 Tower.prototype.updateStats = function() {
