@@ -255,6 +255,20 @@ window.initGame = function(scene) {
   // Attach to renderer DOM
   window.renderer && window.renderer.domElement && window.renderer.domElement.addEventListener('click', window._placementHandler);
 
+  // Touch support for mobile devices
+  const touchHandler = function(e) {
+    if (!e.changedTouches || e.changedTouches.length === 0) return;
+    const touch = e.changedTouches[0];
+    // Create a synthetic event object with clientX/Y so our handler can reuse its logic
+    const fakeEvent = {
+      clientX: touch.clientX,
+      clientY: touch.clientY
+    };
+    window._placementHandler(fakeEvent);
+  };
+  window.renderer && window.renderer.domElement && window.renderer.domElement.addEventListener('touchend', touchHandler);
+  document.getElementById('canvas-container') && document.getElementById('canvas-container').addEventListener('touchend', touchHandler);
+
   // Cheat code: Press 'E' to spawn 100 medic-boosted shooters with infinite range
   document.addEventListener('keydown', function(e) {
     // --- CORE CHEAT CODES ---

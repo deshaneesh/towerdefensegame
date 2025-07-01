@@ -11,8 +11,20 @@ function initThree() {
   scene.background = new THREE.Color(0x222222);
 
   camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.set(0, 35, 35);
-  camera.lookAt(0, 0, 0);
+  function adjustCameraView() {
+    const isMobile = window.innerWidth < 700 || /Mobi|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      camera.position.set(0, 70, 70);
+      camera.fov = 75;
+    } else {
+      camera.position.set(0, 35, 35);
+      camera.fov = 60;
+    }
+    camera.lookAt(0, 0, 0);
+    camera.updateProjectionMatrix();
+  }
+  adjustCameraView();
+  window.adjustCameraView = adjustCameraView;
   window.camera = camera;
   window.renderer = renderer;
   window.scene = scene;
@@ -24,7 +36,7 @@ function initThree() {
 
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
+  window.adjustCameraView && window.adjustCameraView();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
